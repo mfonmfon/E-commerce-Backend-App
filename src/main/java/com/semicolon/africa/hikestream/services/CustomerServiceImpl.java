@@ -2,21 +2,15 @@ package com.semicolon.africa.hikestream.services;
 
 import com.semicolon.africa.hikestream.data.model.Customers;
 import com.semicolon.africa.hikestream.data.repository.CustomerRepository;
-import com.semicolon.africa.hikestream.dto.request.AddCustomerRequest;
-import com.semicolon.africa.hikestream.dto.request.LoginCustomerRequest;
-import com.semicolon.africa.hikestream.dto.request.SignupCustomerRequest;
-import com.semicolon.africa.hikestream.dto.request.UpdateCustomerRequest;
+import com.semicolon.africa.hikestream.dto.request.*;
 import com.semicolon.africa.hikestream.dto.response.*;
-import com.semicolon.africa.hikestream.exception.CustomerNotFoundException;
-import com.semicolon.africa.hikestream.exception.EmptyFieldsException;
-import com.semicolon.africa.hikestream.exception.PasswordLengthException;
+import com.semicolon.africa.hikestream.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static com.semicolon.africa.hikestream.utils.Mapper.AddCustomerRequestMapper;
-import static com.semicolon.africa.hikestream.utils.Mapper.AddCustomerResponseMapper;
+import static com.semicolon.africa.hikestream.utils.Mapper.*;
 
 @Service
 public class CustomerServiceImpl implements CustomerService{
@@ -28,6 +22,7 @@ public class CustomerServiceImpl implements CustomerService{
     public SignupCustomerResponse signUp(SignupCustomerRequest request) {
         Customers customers = new Customers();
         AddCustomerRequestMapper(request, customers);
+        validateCustomerEmail(request.getEmail());
         if(isValueIsNullOrEmpty(request.getFirstName())||
                 isValueIsNullOrEmpty(request.getLastName())||
                 isValueIsNullOrEmpty(request.getEmail())||
@@ -43,67 +38,114 @@ public class CustomerServiceImpl implements CustomerService{
         customerRepository.save(customers);
         return AddCustomerResponseMapper(customers);
     }
-
     @Override
     public LoginCustomerResponse login(LoginCustomerRequest loginRequest) {
         Customers customers = new Customers();
-        findCustomerByEmail(loginRequest.getEmail());
+        validateCustomerEmail(loginRequest.getEmail());
         customers.setPassword(loginRequest.getPassword());
         customers.setEmail(loginRequest.getEmail());
-        if (isValueIsNullOrEmpty(loginRequest.getEmail())||
-                isValueIsNullOrEmpty(loginRequest.getPassword())){
+        if (isValueIsNullOrEmpty(customers.getEmail()) ||
+                isValueIsNullOrEmpty(customers.getPassword())) {
             throw new EmptyFieldsException("Empty fields, please enter all fields");
         }
-        LoginCustomerResponse response = new LoginCustomerResponse();
-        response.setPassword(customers.getPassword());
-        response.setEmail(customers.getEmail());
-        response.setMessage("Login Successfully");
-        return response;
+        if (isValueIsNullOrEmpty(loginRequest.getEmail()) ||
+                isValueIsNullOrEmpty(loginRequest.getPassword())) {
+            throw new EmptyFieldsException("Empty fields, please enter all fields");
+        } else {
+            LoginCustomerResponse response = new LoginCustomerResponse();
+            response.setPassword(customers.getPassword());
+            response.setEmail(customers.getEmail());
+            response.setLoggedIn(true);
+            response.setMessage("Login Successfully");
+            return response;
+        }
     }
 
-    private void findCustomerByEmail(String email) {
+    private void validateCustomerEmail(String email) {
         customerRepository.findCustomerByEmail(email).
                 orElseThrow(() -> new CustomerNotFoundException("Customer Does not exist"));
     }
 
     @Override
-    public LogoutCustomerResponse logout() {
-        return null;
+    public LogoutCustomerResponse logout(String email) {
+        Customers customers = new Customers();
+        customers.setLoggedIn(true);
+        validateCustomerEmail(email);
+        customerRepository.save(customers);
+        LogoutCustomerResponse response = new LogoutCustomerResponse();
+        response.setMessage("Logout successfully");
+        return response;
     }
 
     @Override
     public AddCustomerResponse addCustomer(AddCustomerRequest request) {
-        return null;
+        Customers customers = addCustomerRequest(request);
+        if (isValueIsNullOrEmpty(request.getFirstName()) ||
+                isValueIsNullOrEmpty(request.getLastName()) ||
+                isValueIsNullOrEmpty(request.getEmail())||
+                isValueIsNullOrEmpty(request.getPhoneNumber())||
+                isValueIsNullOrEmpty(request.getHomeAddress())){
+            throw new EmptyFieldsException("Empty fields, please enter all fields");
+        }
+        if (!request.getEmail().contains("@") || ! request.getEmail().contains(".")){
+            throw new InvalidEmailInputException("Email must contain @ or .");
+        }
+        customerRepository.save(customers);
+        return addCustomerResponse(customers);
     }
 
     @Override
     public UpdateCustomerResponse updateCustomer(UpdateCustomerRequest request) {
+        Customers customers = new Customers();
+        updateCustomerRequest(request, customers);
+        validateCustomerEmail(request.getEmail());
+        if (isValueIsNullOrEmpty(request.getFirstName())||
+                isValueIsNullOrEmpty(request.getEmail())||
+                isValueIsNullOrEmpty(request.getLastName())||
+                isValueIsNullOrEmpty(request.getHomeAddress())||
+                isValueIsNullOrEmpty(request.getPhoneNumber())){
+            throw new InvalidEmailInputException("Empty fields, please enter all fields");
+        }
+        return UpdateCustomerResponseMapping(customers);
+    }
+
+    @Override
+    public PurchaseResponse purchase(PurchaseRequest purchaseRequest) {
         return null;
     }
 
     @Override
     public DeleteCustomerResponse deleteCustomerFirstName(String firstName) {
-        return null;
+        Customers customers = findByFirstName(firstName);
+        customerRepository.delete(customers);
+        DeleteCustomerResponse response = new DeleteCustomerResponse();
+        response.setMessage("Delete successfully");
+        return response;
+    }
+
+    private Customers findByFirstName(String firstName) {
+        return customerRepository.findByFirstName(firstName).
+                orElseThrow(()-> new FirstNameNotFound("Not found"));
     }
 
     @Override
     public List<Customers> findAllCustomers() {
-        return List.of();
+        return customerRepository.findAll();
     }
 
     @Override
     public List<Customers> findCustomerByFirstName(String firstName) {
-        return List.of();
+        return customerRepository.findCustomerByFirstName(firstName);
     }
 
     @Override
     public List<Customers> findCustomerByLastName(String lastName) {
-        return List.of();
+        return customerRepository.findCustomerByLastName(lastName);
     }
 
     @Override
     public List<Customers> findCustomerByPhoneNumber(String phoneNumber) {
-        return List.of();
+        return customerRepository.findCustomersByPhoneNumber(phoneNumber);
     }
 
     private boolean passwordLength(String password) {

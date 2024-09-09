@@ -8,5 +8,6 @@ import lombok.Setter;
 public class LoginCustomerResponse {
     private String email;
     private String password;
+    private boolean isLoggedIn;
     private String message;
 }

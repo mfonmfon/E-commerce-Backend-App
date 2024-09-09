@@ -21,8 +21,10 @@ public class Customers {
     private String lastName;
     private String email;
     private String password;
+    private String confirmPassword;
     private String homeAddress;
     private String phoneNumber;
+    private boolean isLoggedIn;
     private BillingInformation billingInformation;
     @DBRef
     List<ShoppingCart> shoppingCart = new ArrayList<>();
