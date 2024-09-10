@@ -1,10 +1,14 @@
 package com.semicolon.africa.hikestream.services;
 
 import com.semicolon.africa.hikestream.data.repository.CustomerRepository;
+import com.semicolon.africa.hikestream.dto.request.AddCustomerRequest;
 import com.semicolon.africa.hikestream.dto.request.LoginCustomerRequest;
 import com.semicolon.africa.hikestream.dto.request.SignupCustomerRequest;
+import com.semicolon.africa.hikestream.dto.request.UpdateCustomerRequest;
+import com.semicolon.africa.hikestream.dto.response.AddCustomerResponse;
 import com.semicolon.africa.hikestream.dto.response.LoginCustomerResponse;
 import com.semicolon.africa.hikestream.dto.response.SignupCustomerResponse;
+import com.semicolon.africa.hikestream.dto.response.UpdateCustomerResponse;
 import com.semicolon.africa.hikestream.exception.EmptyFieldsException;
 import com.semicolon.africa.hikestream.exception.PasswordLengthException;
 import org.junit.jupiter.api.BeforeEach;
@@ -86,5 +90,31 @@ class CustomerServiceImplTest {
        LoginCustomerResponse response = customerService.login(request);
        assertThat(response).isNotNull();
        assertThat(response.getMessage()).contains("Login successfully");
+    }
+
+    @Test
+    public void testThatCustomersCanBeAdded(){
+        AddCustomerRequest request = new AddCustomerRequest();
+        request.setFirstName("Kim");
+        request.setLastName("Ebuka");
+        request.setPhoneNumber("090345676");
+        request.setEmail("kim@gmail.com");
+        request.setHomeAddress("Sabo, Yab, Lagos");
+        AddCustomerResponse response = customerService.addCustomer(request);
+        assertThat(response).isNotNull();
+        assertThat(response.getMessage()).contains("Successfully added a customer");
+    }
+
+    @Test
+    public void testThatCustomersCanBeUpdated(){
+        UpdateCustomerRequest request = new UpdateCustomerRequest();
+        request.setFirstName("Kim");
+        request.setLastName("Ebuka");
+        request.setPhoneNumber("090345676");
+        request.setEmail("kim@gmail.com");
+        request.setHomeAddress("Sabo, Yab, Lagos");
+        UpdateCustomerResponse response = customerService.updateCustomer(request);
+        assertThat(response).isNotNull();
+        assertThat(response.getMessage()).contains("Successfully updated");
     }
 }

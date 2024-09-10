@@ -8,5 +8,6 @@ public enum ProductCategory {
     SNICKERS,
     TABLES,
     CHAIRS,
-    GUCCI_BAG;
+    GUCCI_BAG,
+    CAR;
 }

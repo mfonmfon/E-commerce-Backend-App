@@ -20,9 +20,9 @@ public class CustomerServiceImpl implements CustomerService{
 
     @Override
     public SignupCustomerResponse signUp(SignupCustomerRequest request) {
+        validateCustomerEmail(request.getEmail());
         Customers customers = new Customers();
         AddCustomerRequestMapper(request, customers);
-        validateCustomerEmail(request.getEmail());
         if(isValueIsNullOrEmpty(request.getFirstName())||
                 isValueIsNullOrEmpty(request.getLastName())||
                 isValueIsNullOrEmpty(request.getEmail())||
@@ -96,9 +96,8 @@ public class CustomerServiceImpl implements CustomerService{
 
     @Override
     public UpdateCustomerResponse updateCustomer(UpdateCustomerRequest request) {
-        Customers customers = new Customers();
+        Customers customers = findByCustomerEmail(request.getEmail());
         updateCustomerRequest(request, customers);
-        validateCustomerEmail(request.getEmail());
         if (isValueIsNullOrEmpty(request.getFirstName())||
                 isValueIsNullOrEmpty(request.getEmail())||
                 isValueIsNullOrEmpty(request.getLastName())||
@@ -107,6 +106,10 @@ public class CustomerServiceImpl implements CustomerService{
             throw new InvalidEmailInputException("Empty fields, please enter all fields");
         }
         return UpdateCustomerResponseMapping(customers);
+    }
+    private Customers findByCustomerEmail(String email) {
+        return customerRepository.findCustomerByEmail(email)
+                .orElseThrow(()-> new CustomerDoesNotExistException("Account Not Found"));
     }
 
     @Override
@@ -154,6 +157,4 @@ public class CustomerServiceImpl implements CustomerService{
     private boolean isValueIsNullOrEmpty(String value) {
         return value == null || value.trim().isEmpty();
     }
-
-
 }
