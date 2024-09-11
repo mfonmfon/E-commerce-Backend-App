@@ -85,8 +85,8 @@ public class CustomersController {
                    HttpStatus.BAD_REQUEST);
        }
     }
-    @GetMapping("/searchByFirstName")
-    public ResponseEntity<?> searchByFirstName(String firstName){
+    @GetMapping("/searchByFirstName{firstName}")
+    public ResponseEntity<?> searchByFirstName(@PathVariable String firstName){
        try {
            List<Customers> findByFirstName = customerService.findCustomerByFirstName(firstName);
            return new ResponseEntity<>(new ApiResponse(true, findByFirstName),
@@ -97,8 +97,8 @@ public class CustomersController {
                    HttpStatus.BAD_REQUEST);
        }
     }
-    @GetMapping("/searchByLastName")
-    public ResponseEntity<?> searchByLastName(String lastName){
+    @GetMapping("/searchByLastName{lastName}")
+    public ResponseEntity<?> searchByLastName(@PathVariable String lastName){
         try {
             List<Customers> findByLastName = customerService.findCustomerByLastName(lastName);
             return new ResponseEntity<>(new ApiResponse(true, findByLastName),
@@ -110,8 +110,8 @@ public class CustomersController {
         }
     }
 
-    @GetMapping("/searchByPhoneNumber")
-    public ResponseEntity<?> searchByPhoneNumber(String phoneNumber){
+    @GetMapping("/searchByPhoneNumber{phoneNumber}")
+    public ResponseEntity<?> searchByPhoneNumber(@PathVariable String phoneNumber){
         try {
             List<Customers> searchByPhoneNumber = customerService.findCustomerByPhoneNumber(phoneNumber);
             return new ResponseEntity<>(new ApiResponse(true, searchByPhoneNumber),
@@ -133,5 +133,12 @@ public class CustomersController {
             return new ResponseEntity<>(new ApiResponse(false, exception.getMessage()),
                     HttpStatus.BAD_REQUEST);
         }
+    }
+    @PostMapping("/logout/{email}")
+    public ResponseEntity<?> logout(@PathVariable String email){
+        try {
+
+        }
+
     }
 }
